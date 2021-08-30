@@ -41,10 +41,6 @@ volatile uint16_t size_to_receive = 0;
 void PipeCom_Init(void)
 {
     Serial.begin(1000000);
-    while (!Serial)
-    {
-        ; // wait for serial port to connect. Needed for native USB port only
-    }
     PipeBuffer_Init();
 }
 
@@ -89,8 +85,9 @@ void PipeCom_SendL2P(uint8_t *data, uint16_t size)
     char character = 0;
     while (size_to_send != 0)
     {
-        character = *data++;
-        Serial.write(&character);
+        character = *data;
+        Serial.write(&character, 1);
+        data++;
         size_to_send--;
     }
     is_sending = false;
