@@ -8,6 +8,8 @@ extern "C"
 #include <luos.h>
 #include "led.h"
 #include "blinker.h"
+#include "pipe.h"
+#include "gate.h"
 
 #ifdef __cplusplus
 }
@@ -22,6 +24,8 @@ void setup()
 {
     Luos_Init();
     Led_Init();
+    Pipe_Init();
+    Gate_Init();
     Blinker_Init();
 }
 /******************************************************************************
@@ -33,5 +37,7 @@ void loop()
 {
     Luos_Loop();
     Led_Loop();
+    Pipe_Loop();
+    Gate_Loop();
     Blinker_Loop();
 }

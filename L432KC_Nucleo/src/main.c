@@ -26,6 +26,8 @@
 #include "luos.h"
 #include "led.h"
 #include "blinker.h"
+#include "pipe.h"
+#include "gate.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -90,6 +92,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
   Luos_Init();
   Led_Init();
+  Pipe_Init();
+  Gate_Init();
   Blinker_Init();
   /* USER CODE END 2 */
 
@@ -102,6 +106,8 @@ int main(void)
     /* USER CODE BEGIN 3 */
     Luos_Loop();
     Led_Loop();
+    Pipe_Loop();
+    Gate_Loop();
     Blinker_Loop();
   }
   /* USER CODE END 3 */
