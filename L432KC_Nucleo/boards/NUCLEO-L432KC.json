@@ -25,6 +25,8 @@
         "stm32cube"
     ],
     "name": "STM32L432",
+    "url": "url",
+    "vendor": "vendor",
     "upload": {
         "maximum_ram_size": 65536,
         "maximum_size": 262144,
