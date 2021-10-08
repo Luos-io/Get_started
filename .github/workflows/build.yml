@@ -1,8 +1,8 @@
-name: Dev Build
+name: Build
 
 on:
   push:
-    branches-ignore:
+    branches:
       - master
 
 jobs:
