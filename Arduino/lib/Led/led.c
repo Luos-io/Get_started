@@ -24,11 +24,12 @@ static void Led_MsgHandler(service_t *service, msg_t *msg);
  * @param None
  * @return None
  ******************************************************************************/
-void Led_Init(void) {
-  pinMode(LED_BUILTIN, OUTPUT);
+void Led_Init(void)
+{
+    pinMode(LED_BUILTIN, OUTPUT);
 
-  revision_t revision = {.major = 1, .minor = 0, .build = 0};
-  Luos_CreateService(Led_MsgHandler, STATE_TYPE, "led", revision);
+    revision_t revision = {.major = 1, .minor = 0, .build = 0};
+    Luos_CreateService(Led_MsgHandler, STATE_TYPE, "led", revision);
 }
 /******************************************************************************
  * @brief loop must be call in project loop
@@ -42,12 +43,17 @@ void Led_Loop(void) {}
  * @param Msg receive
  * @return None
  ******************************************************************************/
-static void Led_MsgHandler(service_t *service, msg_t *msg) {
-  if (msg->header.cmd == IO_STATE) {
-    if (msg->data[0] == 0) {
-      digitalWrite(LED_BUILTIN, false);
-    } else {
-      digitalWrite(LED_BUILTIN, true);
+static void Led_MsgHandler(service_t *service, msg_t *msg)
+{
+    if (msg->header.cmd == IO_STATE)
+    {
+        if (msg->data[0] == 0)
+        {
+            digitalWrite(LED_BUILTIN, false);
+        }
+        else
+        {
+            digitalWrite(LED_BUILTIN, true);
+        }
     }
-  }
 }
