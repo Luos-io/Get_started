@@ -62,8 +62,10 @@ void Blinker_Loop(void)
             led_msg.header.target_mode = IDACK;    // We are asking for an acknowledgement
 
             led_msg.header.size = sizeof(char);   // Our message only contains one character, the IO state
-            led_msg.data[0]     = led_last_state; // The I/O state of the LED to be sent (1 or 0, on or off)
-            Luos_SendMsg(blinker_app, &led_msg);  // Now that we have the elements, send the message
+            led_msg.data[0]     = led_last_state; // The I/O state of the LED to be sent
+                                                  // (1 or 0, on or off)
+            Luos_SendMsg(blinker_app,
+                         &led_msg); // Now that we have the elements, send the message
         }
     }
 }

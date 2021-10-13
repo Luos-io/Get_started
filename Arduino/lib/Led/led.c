@@ -36,9 +36,7 @@ void Led_Init(void)
  * @param None
  * @return None
  ******************************************************************************/
-void Led_Loop(void)
-{
-}
+void Led_Loop(void) {}
 /******************************************************************************
  * @brief Msg manager callback when a msg receive for this service
  * @param service destination

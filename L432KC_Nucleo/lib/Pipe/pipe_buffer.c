@@ -4,9 +4,9 @@
  * @author Luos
  * @version 0.0.0
  ******************************************************************************/
+#include "luos_utils.h"
 #include <stdbool.h>
 #include <string.h>
-#include "luos_utils.h"
 
 #include "pipe_com.h"
 
@@ -54,10 +54,7 @@ void PipeBuffer_Init(void)
  * @param None
  * @return None
  ******************************************************************************/
-uint8_t *PipeBuffer_GetP2LBuffer(void)
-{
-    return &P2L_Buffer[0];
-}
+uint8_t *PipeBuffer_GetP2LBuffer(void) { return &P2L_Buffer[0]; }
 /******************************************************************************
  * @brief init must be call in project init
  * @param None
@@ -167,7 +164,4 @@ static uint8_t PipeBuffer_P2LTaskNeedClear(uint16_t PositionLastData)
  * @param None
  * @return None
  ******************************************************************************/
-uint8_t *PipeBuffer_GetL2PBuffer(void)
-{
-    return &L2P_Buffer[0];
-}
+uint8_t *PipeBuffer_GetL2PBuffer(void) { return &L2P_Buffer[0]; }
