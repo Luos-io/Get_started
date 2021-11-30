@@ -94,7 +94,7 @@ int main(void)
     Led_Init();
     Pipe_Init();
     Gate_Init();
-    //Blinker_Init();
+    Blinker_Init();
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -108,7 +108,7 @@ int main(void)
         Led_Loop();
         Pipe_Loop();
         Gate_Loop();
-        //Blinker_Loop();
+        Blinker_Loop();
     }
     /* USER CODE END 3 */
 }
