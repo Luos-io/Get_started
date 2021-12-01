@@ -55,5 +55,9 @@ jobs:
         env:
           PLATFORMIO_LIB_EXTRA_DIRS: ${{ matrix.pio_lib_path }}
         run: |
-          cd L432KC_Nucleo
-          platformio run
+          platformio run -d Arduino
+          platformio run -d NUCLEO-F072RB
+          platformio run -d NUCLEO-F401RE
+          platformio run -d NUCLEO-F410RB
+          platformio run -d NUCLEO-G431KB
+          platformio run -d NUCLEO-L432KC

@@ -52,7 +52,7 @@
  *    MCUFREQ                 | Put your the MCU frequency (value in Hz)
  *    TIMERDIV                | Timer divider clock (see your clock configuration)
  *    USE_CRC_HW              | define to 0 if there is no Module CRC in your MCU
- *    USE_TX_IT               | define to 1 to not use DMA transfers for Luos Tx
+ *    USE_TX_IT               | define to 1 to not use DMA transfert for Luos Tx
  *
  *    PORT_CLOCK_ENABLE       | Enable clock for port
  *    PTPx                    | A,B,C,D etc. PTP Branch Pin/Port/IRQ
@@ -81,5 +81,34 @@
  *    PAGE_SIZE               | FLASH page size
  *    ADDRESS_LAST_PAGE_FLASH | Page to write alias
 ******************************************************************************/
+
+/*******************************************************************************
+ * MCU CONFIG
+ ******************************************************************************/
+#define MCUFREQ  84000000
+#define TIMERDIV 1
+/*******************************************************************************
+ * PINOUT CONFIG
+ ******************************************************************************/
+
+/*******************************************************************************
+ * COM CONFIG
+ ******************************************************************************/
+
+/*******************************************************************************
+ * COM DMA CONFIG
+ ******************************************************************************/
+
+/*******************************************************************************
+ * COM TIMEOUT CONFIG
+ ******************************************************************************/
+#define LUOS_TIMER_CLOCK_ENABLE() __HAL_RCC_TIM3_CLK_ENABLE()
+#define LUOS_TIMER                TIM3
+#define LUOS_TIMER_IRQ            TIM3_IRQn
+#define LUOS_TIMER_IRQHANDLER()   TIM3_IRQHandler()
+/*******************************************************************************
+ * FLASH CONFIG
+ ******************************************************************************/
+#define FLASH_SECTOR FLASH_SECTOR_7
 
 #endif /* _NODE_CONFIG_H_ */

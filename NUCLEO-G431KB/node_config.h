@@ -52,7 +52,7 @@
  *    MCUFREQ                 | Put your the MCU frequency (value in Hz)
  *    TIMERDIV                | Timer divider clock (see your clock configuration)
  *    USE_CRC_HW              | define to 0 if there is no Module CRC in your MCU
- *    USE_TX_IT               | define to 1 to not use DMA transfers for Luos Tx
+ *    USE_TX_IT               | define to 1 to not use DMA transfert for Luos Tx
  *
  *    PORT_CLOCK_ENABLE       | Enable clock for port
  *    PTPx                    | A,B,C,D etc. PTP Branch Pin/Port/IRQ
