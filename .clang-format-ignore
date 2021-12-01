@@ -1,0 +1,8 @@
+./**/src
+./**/include
+# third party libs
+./.*
+*.json
+*/.vscode
+*/.pio
+.github
