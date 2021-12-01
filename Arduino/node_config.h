@@ -18,7 +18,7 @@
  *     preprocessor definitions of MCU Hardware needs
  *
  *   # Usage
- *      This file should be place a the root folder of your project and include 
+ *      This file should be place a the root folder of your project and include
  *      where build flag preprocessor definitions are define in your IDE
  *      -include node_config.h
  *
@@ -30,11 +30,11 @@
 
 /*******************************************************************************
  * PROJECT DEFINITION
-*******************************************************************************/
+ *******************************************************************************/
 
 /*******************************************************************************
  * LUOS LIBRARY DEFINITION
-*******************************************************************************
+ *******************************************************************************
  *    Define                | Default Value              | Description
  *    :---------------------|------------------------------------------------------
  *    MAX_SERVICE_NUMBER    |              5             | Service number in the node
@@ -42,10 +42,7 @@
  *    MAX_MSG_NB            |   2*MAX_SERVICE_NUMBER   | Message number in Luos buffer
  *    NBR_PORT              |              2             | PTP Branch number Max 8
  *    NBR_RETRY             |              10            | Send Retry number in case of NACK or collision
-******************************************************************************/
-
-#define MAX_SERVICE_NUMBER 5
-#define MAX_MSG_NB         10
+ ******************************************************************************/
 
 /*******************************************************************************
  * LUOS HAL LIBRARY DEFINITION
