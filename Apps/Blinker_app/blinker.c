@@ -22,7 +22,7 @@ void Blinker_Init(void)
     blinker_app         = Luos_CreateService(Blinker_MsgHandler, BLINKER_APP, "blinker", revision);
 
     // Detect all service of your network and create a routing_table
-    RoutingTB_DetectServices(blinker_app);
+    Luos_Detect(blinker_app);
 
     // Set the default blink duration
     blinktime = TimeOD_TimeFrom_ms(DEFAULTBLINKTIME_MS);
