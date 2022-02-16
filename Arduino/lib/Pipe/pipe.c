@@ -4,9 +4,9 @@
  * @author Luos
  * @version 0.1.0
  ******************************************************************************/
+#include <stdbool.h>
 #include "pipe.h"
 #include "pipe_com.h"
-#include <stdbool.h>
 
 /*******************************************************************************
  * Definitions
@@ -28,13 +28,11 @@ static void Pipe_MsgHandler(service_t *service, msg_t *msg);
  ******************************************************************************/
 void Pipe_Init(void)
 {
-    revision_t revision = {.major = 0, .minor = 0, .build = 0};
-    Luos_CreateService(Pipe_MsgHandler, PIPE_TYPE, "Pipe", revision);
+    revision_t revision = {.major = 1, .minor = 0, .build = 0};
     PipeCom_Init();
-    P2L_StreamChannel = Stream_CreateStreamingChannel(
-        PipeBuffer_GetP2LBuffer(), PIPE_TO_LUOS_BUFFER_SIZE, 1);
-    L2P_StreamChannel = Stream_CreateStreamingChannel(
-        PipeBuffer_GetL2PBuffer(), LUOS_TO_PIPE_BUFFER_SIZE, 1);
+    Luos_CreateService(Pipe_MsgHandler, PIPE_TYPE, "Pipe", revision);
+    P2L_StreamChannel = Stream_CreateStreamingChannel(PipeBuffer_GetP2LBuffer(), PIPE_TO_LUOS_BUFFER_SIZE, 1);
+    L2P_StreamChannel = Stream_CreateStreamingChannel(PipeBuffer_GetL2PBuffer(), LUOS_TO_PIPE_BUFFER_SIZE, 1);
 }
 /******************************************************************************
  * @brief loop must be call in project loop
@@ -84,7 +82,6 @@ static void Pipe_MsgHandler(service_t *service, msg_t *msg)
     }
     else if (msg->header.cmd == SET_CMD)
     {
-        uint16_t size = 0;
         if (msg->header.size > 0)
         {
             Luos_ReceiveStreaming(service, msg, &L2P_StreamChannel);
@@ -112,10 +109,16 @@ static void Pipe_MsgHandler(service_t *service, msg_t *msg)
  * @param None
  * @return None
  ******************************************************************************/
-streaming_channel_t *get_L2P_StreamChannel(void) { return &L2P_StreamChannel; }
+streaming_channel_t *get_L2P_StreamChannel(void)
+{
+    return &L2P_StreamChannel;
+}
 /******************************************************************************
  * @brief get_P2L_StreamChannel
  * @param None
  * @return None
  ******************************************************************************/
-streaming_channel_t *get_P2L_StreamChannel(void) { return &P2L_StreamChannel; }
+streaming_channel_t *get_P2L_StreamChannel(void)
+{
+    return &P2L_StreamChannel;
+}

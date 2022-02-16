@@ -103,7 +103,7 @@ void PipeBuffer_ClearP2LTask(void)
  ******************************************************************************/
 void PipeBuffer_AllocP2LTask(uint16_t PositionLastData, uint8_t overflow)
 {
-    if (P2L_Buffer[PositionLastData] == '\r')
+    if ((P2L_Buffer[PositionLastData - 1] == '\r') && (P2L_Buffer[PositionLastData] == '\n'))
     {
         if ((overflow == true) && (P2LBuffer_PrevStartData < PositionLastData))
         {

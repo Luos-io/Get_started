@@ -103,7 +103,18 @@ void PipeBuffer_ClearP2LTask(void)
  ******************************************************************************/
 void PipeBuffer_AllocP2LTask(uint16_t PositionLastData, uint8_t overflow)
 {
-    if (P2L_Buffer[PositionLastData] == '\r')
+    uint16_t last_data_index = 0;
+    // check if we try to access a memory region outside of buffer bounds
+    if (PositionLastData == 0)
+    {
+        last_data_index = PIPE_TO_LUOS_BUFFER_SIZE - 1;
+    }
+    else
+    {
+        last_data_index = PositionLastData - 1;
+    }
+
+    if ((P2L_Buffer[last_data_index] == '\r') && (P2L_Buffer[PositionLastData] == '\n'))
     {
         if ((overflow == true) && (P2LBuffer_PrevStartData < PositionLastData))
         {

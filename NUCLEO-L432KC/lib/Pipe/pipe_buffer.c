@@ -4,9 +4,9 @@
  * @author Luos
  * @version 0.0.0
  ******************************************************************************/
-#include "luos_utils.h"
 #include <stdbool.h>
 #include <string.h>
+#include "luos_utils.h"
 
 #include "pipe_com.h"
 
@@ -54,7 +54,10 @@ void PipeBuffer_Init(void)
  * @param None
  * @return None
  ******************************************************************************/
-uint8_t *PipeBuffer_GetP2LBuffer(void) { return &P2L_Buffer[0]; }
+uint8_t *PipeBuffer_GetP2LBuffer(void)
+{
+    return &P2L_Buffer[0];
+}
 /******************************************************************************
  * @brief init must be call in project init
  * @param None
@@ -100,7 +103,18 @@ void PipeBuffer_ClearP2LTask(void)
  ******************************************************************************/
 void PipeBuffer_AllocP2LTask(uint16_t PositionLastData, uint8_t overflow)
 {
-    if (P2L_Buffer[PositionLastData] == '\r')
+    uint16_t last_data_index = 0;
+    // check if we try to access a memory region outside of buffer bounds
+    if (PositionLastData == 0)
+    {
+        last_data_index = PIPE_TO_LUOS_BUFFER_SIZE - 1;
+    }
+    else
+    {
+        last_data_index = PositionLastData - 1;
+    }
+
+    if ((P2L_Buffer[last_data_index] == '\r') && (P2L_Buffer[PositionLastData] == '\n'))
     {
         if ((overflow == true) && (P2LBuffer_PrevStartData < PositionLastData))
         {
@@ -164,4 +178,7 @@ static uint8_t PipeBuffer_P2LTaskNeedClear(uint16_t PositionLastData)
  * @param None
  * @return None
  ******************************************************************************/
-uint8_t *PipeBuffer_GetL2PBuffer(void) { return &L2P_Buffer[0]; }
+uint8_t *PipeBuffer_GetL2PBuffer(void)
+{
+    return &L2P_Buffer[0];
+}

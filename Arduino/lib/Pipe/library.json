@@ -2,21 +2,17 @@
     "name": "Pipe",
     "keywords": "robus,network,microservice,luos,operating system,os,embedded,communication,service,ST",
     "description": "a simple button driver",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "authors": {
         "name": "Luos",
         "url": "https://luos.io"
     },
     "licence": "MIT",
-    "build": {
-        "flags": [
-            "-DREV={0,1,0}"
-        ]
-    },
+    "build": {},
     "dependencies": [
         {
             "name": "luos/Luos",
-            "version": "^2.0.0"
+            "version": "^2.1.0"
         }
     ]
 }

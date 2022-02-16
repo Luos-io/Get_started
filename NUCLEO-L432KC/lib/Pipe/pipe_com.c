@@ -4,9 +4,9 @@
  * @author Luos
  * @version 0.0.0
  ******************************************************************************/
+#include <stdbool.h>
 #include "pipe_com.h"
 #include "luos_utils.h"
-#include <stdbool.h>
 
 /*******************************************************************************
  * Definitions
@@ -92,8 +92,7 @@ static void PipeCom_DMAInit(void)
 
     // Pipe to Luos
     LL_DMA_DisableChannel(P2L_DMA, P2L_DMA_CHANNEL);
-    LL_DMA_SetDataTransferDirection(P2L_DMA, P2L_DMA_CHANNEL,
-                                    LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+    LL_DMA_SetDataTransferDirection(P2L_DMA, P2L_DMA_CHANNEL, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
     LL_DMA_SetChannelPriorityLevel(P2L_DMA, P2L_DMA_CHANNEL, LL_DMA_PRIORITY_LOW);
     LL_DMA_SetMode(P2L_DMA, P2L_DMA_CHANNEL, LL_DMA_MODE_CIRCULAR);
     LL_DMA_SetPeriphIncMode(P2L_DMA, P2L_DMA_CHANNEL, LL_DMA_PERIPH_NOINCREMENT);
@@ -105,14 +104,12 @@ static void PipeCom_DMAInit(void)
     // Prepare buffer
     LL_DMA_SetPeriphAddress(P2L_DMA, P2L_DMA_CHANNEL, (uint32_t)&PIPE_COM->RDR);
     LL_DMA_SetDataLength(P2L_DMA, P2L_DMA_CHANNEL, PIPE_TO_LUOS_BUFFER_SIZE);
-    LL_DMA_SetMemoryAddress(P2L_DMA, P2L_DMA_CHANNEL,
-                            (uint32_t)PipeBuffer_GetP2LBuffer());
+    LL_DMA_SetMemoryAddress(P2L_DMA, P2L_DMA_CHANNEL, (uint32_t)PipeBuffer_GetP2LBuffer());
     LL_USART_EnableDMAReq_RX(PIPE_COM);
     LL_DMA_EnableChannel(P2L_DMA, P2L_DMA_CHANNEL);
 
     // Luos to Pipe
-    LL_DMA_SetDataTransferDirection(L2P_DMA, L2P_DMA_CHANNEL,
-                                    LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+    LL_DMA_SetDataTransferDirection(L2P_DMA, L2P_DMA_CHANNEL, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
     LL_DMA_SetChannelPriorityLevel(L2P_DMA, L2P_DMA_CHANNEL, LL_DMA_PRIORITY_LOW);
     LL_DMA_SetMode(L2P_DMA, L2P_DMA_CHANNEL, LL_DMA_MODE_NORMAL);
     LL_DMA_SetPeriphIncMode(L2P_DMA, L2P_DMA_CHANNEL, LL_DMA_PERIPH_NOINCREMENT);
@@ -139,7 +136,6 @@ void PipeCom_SendL2P(uint8_t *data, uint16_t size)
     LUOS_ASSERT(size > 0);
     is_sending   = true;
     size_to_send = size;
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
     LL_DMA_DisableChannel(L2P_DMA, L2P_DMA_CHANNEL);
     LL_DMA_SetMemoryAddress(L2P_DMA, L2P_DMA_CHANNEL, (uint32_t)data);
     LL_DMA_SetDataLength(L2P_DMA, L2P_DMA_CHANNEL, size);
@@ -150,7 +146,10 @@ void PipeCom_SendL2P(uint8_t *data, uint16_t size)
  * @param None
  * @return None
  ******************************************************************************/
-volatile uint8_t PipeCom_SendL2PPending(void) { return is_sending; }
+volatile uint8_t PipeCom_SendL2PPending(void)
+{
+    return is_sending;
+}
 /******************************************************************************
  * @brief init must be call in project init
  * @param None
@@ -200,14 +199,11 @@ void L2P_DMA_IRQHANDLER()
         size = Stream_GetAvailableSampleNBUntilEndBuffer(get_L2P_StreamChannel());
         if (size > 0)
         {
-            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_SET);
             PipeCom_SendL2P(get_L2P_StreamChannel()->sample_ptr, size);
-            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_RESET);
         }
         else
         {
             is_sending = false;
-            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
         }
     }
 }
