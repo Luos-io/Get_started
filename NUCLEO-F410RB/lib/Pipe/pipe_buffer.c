@@ -4,181 +4,122 @@
  * @author Luos
  * @version 0.0.0
  ******************************************************************************/
-#include <stdbool.h>
-#include <string.h>
-#include "luos_utils.h"
-
 #include "pipe_com.h"
+#include "pipe_buffer.h"
+#include <stdbool.h>
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define PIPE_TO_LUOS_MAX_TASK 10
-
-typedef struct
-{
-    uint8_t *data_pt; /*!< Start pointer of the data on P2L_Buffer. */
-    uint16_t size;    /*!< size of the data. */
-    uint8_t *end;     /*!< Start pointer of the data on P2L_Buffer. */
-} P2LTask_t;
 
 /*******************************************************************************
  * Variables
  ******************************************************************************/
 uint8_t P2L_Buffer[PIPE_TO_LUOS_BUFFER_SIZE] = {0};
-P2LTask_t P2LTask[PIPE_TO_LUOS_MAX_TASK]     = {0};
-uint8_t P2LTaskID                            = 0;
-volatile uint16_t P2LBuffer_PrevStartData    = 0;
-
 uint8_t L2P_Buffer[LUOS_TO_PIPE_BUFFER_SIZE] = {0};
-volatile uint8_t L2P_Buffer_WritePointer     = 0;
 
 /*******************************************************************************
  * Function
  ******************************************************************************/
-static uint8_t PipeBuffer_P2LTaskNeedClear(uint16_t PositionLastData);
-static void PipeBuffer_ClearP2LTask(void);
+
 /******************************************************************************
  * @brief init must be call in project init
  * @param None
  * @return None
  ******************************************************************************/
-void PipeBuffer_Init(void)
+void PipeBuffer_SetL2PMsg(uint8_t *data, uint16_t size)
 {
-    memset((void *)P2LTask, 0, sizeof(P2LTask));
-    P2LBuffer_PrevStartData = 0;
-    P2LTaskID               = 0;
+    streaming_channel_t *StreamChannel = get_L2P_StreamChannel();
+    SerialProtocol_t SerialProtocol    = {SERIAL_HEADER, 0, SERIAL_FOOTER};
+
+    SerialProtocol.Size = size;
+    Stream_PutSample(StreamChannel, &SerialProtocol, 3);
+    Stream_PutSample(StreamChannel, data, size);
+    Stream_PutSample(StreamChannel, &SerialProtocol.Footer, 1);
 }
 /******************************************************************************
  * @brief init must be call in project init
  * @param None
  * @return None
  ******************************************************************************/
-uint8_t *PipeBuffer_GetP2LBuffer(void)
+uint8_t PipeBuffer_GetP2LMsg(uint16_t *size)
 {
-    return &P2L_Buffer[0];
-}
-/******************************************************************************
- * @brief init must be call in project init
- * @param None
- * @return None
- ******************************************************************************/
-uint8_t PipeBuffer_GetP2LTask(uint8_t **data, uint16_t *size)
-{
-    if (P2LTaskID != 0)
+    streaming_channel_t *StreamChannel = get_P2L_StreamChannel();
+    uint16_t TotalSize                 = Stream_GetAvailableSampleNB(StreamChannel);
+    uint16_t SizeUntilEnd              = 0;
+
+    if (TotalSize > 0)
     {
-        *data = P2LTask[0].data_pt;
-        *size = P2LTask[0].size;
-        PipeBuffer_ClearP2LTask();
-        return true;
+        for (uint16_t i = 0; i < TotalSize; i++)
+        {
+            if (*((uint8_t *)(StreamChannel->sample_ptr)) == SERIAL_HEADER)
+            {
+                TotalSize    = TotalSize - i;
+                SizeUntilEnd = Stream_GetAvailableSampleNBUntilEndBuffer(StreamChannel);
+                if (SizeUntilEnd > 1)
+                {
+                    *size = (uint16_t)(*((uint8_t *)(StreamChannel->sample_ptr + 1)));
+                }
+                else
+                {
+                    *size = (uint16_t)(*((uint8_t *)(StreamChannel->ring_buffer)));
+                }
+
+                if (SizeUntilEnd > 2)
+                {
+                    *size |= (uint16_t)(*((uint8_t *)(StreamChannel->sample_ptr + 2)) << 8);
+                }
+                else
+                {
+                    *size |= (uint16_t)(*((uint8_t *)(StreamChannel->ring_buffer)) << 8);
+                }
+                if (TotalSize > *size)
+                {
+                    if (SizeUntilEnd > (*size + 3))
+                    {
+                        if (*((uint8_t *)(StreamChannel->sample_ptr + (*size + 3))) == SERIAL_FOOTER)
+                        {
+                            Stream_RmvAvailableSampleNB(StreamChannel, 3);
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        if (*((uint8_t *)(StreamChannel->ring_buffer + ((*size + 3) - SizeUntilEnd))) == SERIAL_FOOTER)
+                        {
+                            Stream_RmvAvailableSampleNB(StreamChannel, 3);
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    if (*size < PIPE_TO_LUOS_BUFFER_SIZE)
+                    {
+                        return false;
+                    }
+                }
+            }
+            Stream_RmvAvailableSampleNB(StreamChannel, 1);
+        }
     }
     return false;
 }
 /******************************************************************************
- * @brief init must be call in project init
- * @param None
- * @return None
- ******************************************************************************/
-void PipeBuffer_ClearP2LTask(void)
-{
-    uint8_t i = 0;
-    for (i = 0; i < P2LTaskID; i++)
-    {
-        P2LTask[i].data_pt = P2LTask[i + 1].data_pt;
-        P2LTask[i].size    = P2LTask[i + 1].size;
-        P2LTask[i].end     = P2LTask[i + 1].end;
-    }
-    if (P2LTaskID != 0)
-    {
-        P2LTaskID--;
-        P2LTask[P2LTaskID].data_pt = 0;
-        P2LTask[P2LTaskID].size    = 0;
-        P2LTask[P2LTaskID].end     = 0;
-    }
-}
-/******************************************************************************
- * @brief init must be call in project init
- * @param None
- * @return None
- ******************************************************************************/
-void PipeBuffer_AllocP2LTask(uint16_t PositionLastData, uint8_t overflow)
-{
-    uint16_t last_data_index = 0;
-    // check if we try to access a memory region outside of buffer bounds
-    if (PositionLastData == 0)
-    {
-        last_data_index = PIPE_TO_LUOS_BUFFER_SIZE - 1;
-    }
-    else
-    {
-        last_data_index = PositionLastData - 1;
-    }
-
-    if ((P2L_Buffer[last_data_index] == '\r') && (P2L_Buffer[PositionLastData] == '\n'))
-    {
-        if ((overflow == true) && (P2LBuffer_PrevStartData < PositionLastData))
-        {
-            LUOS_ASSERT(0);
-        }
-        while (PipeBuffer_P2LTaskNeedClear(PositionLastData) != false)
-            ;
-        LUOS_ASSERT(P2LTaskID < PIPE_TO_LUOS_MAX_TASK);
-        for (uint8_t i = 0; i < PIPE_TO_LUOS_MAX_TASK; i++)
-        {
-            if (P2LTask[i].data_pt == 0)
-            {
-                P2LTask[i].data_pt = &P2L_Buffer[P2LBuffer_PrevStartData];
-                P2LTask[i].end     = &P2L_Buffer[PositionLastData];
-                PositionLastData++;
-                if (P2LBuffer_PrevStartData < PositionLastData)
-                {
-                    P2LTask[i].size = PositionLastData - P2LBuffer_PrevStartData;
-                }
-                else
-                {
-                    P2LTask[i].size = (((PIPE_TO_LUOS_BUFFER_SIZE)-P2LBuffer_PrevStartData) + PositionLastData);
-                }
-                Stream_AddAvailableSampleNB(get_P2L_StreamChannel(), P2LTask[i].size);
-                if (PositionLastData < PIPE_TO_LUOS_BUFFER_SIZE)
-                {
-                    P2LBuffer_PrevStartData = PositionLastData;
-                }
-                else
-                {
-                    P2LBuffer_PrevStartData = 0;
-                }
-                P2LTaskID++;
-                return;
-            }
-        }
-        // No more space
-        LUOS_ASSERT(0);
-    }
-}
-/******************************************************************************
- * @brief init must be call in project init
- * @param None
- * @return None
- ******************************************************************************/
-static uint8_t PipeBuffer_P2LTaskNeedClear(uint16_t PositionLastData)
-{
-    uint8_t result = false;
-    if (P2LTaskID > 0)
-    {
-        if (((&P2L_Buffer[PositionLastData] > (P2LTask[0].data_pt)) && (&P2L_Buffer[PositionLastData] < (P2LTask[0].end))) || ((&P2L_Buffer[PositionLastData] < (P2LTask[0].data_pt)) && (&P2L_Buffer[PositionLastData] > (P2LTask[0].end))))
-        {
-            result = true;
-            PipeBuffer_ClearP2LTask();
-        }
-    }
-    return result;
-}
-/******************************************************************************
- * @brief init must be call in project init
+ * @brief Get L2P Buffer adresse
  * @param None
  * @return None
  ******************************************************************************/
 uint8_t *PipeBuffer_GetL2PBuffer(void)
 {
     return &L2P_Buffer[0];
+}
+/******************************************************************************
+ * @brief Get P2L Buffer adresse
+ * @param None
+ * @return None
+ ******************************************************************************/
+uint8_t *PipeBuffer_GetP2LBuffer(void)
+{
+    return &P2L_Buffer[0];
 }

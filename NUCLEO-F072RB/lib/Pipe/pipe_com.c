@@ -15,8 +15,9 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-volatile uint8_t is_sending    = false;
-volatile uint16_t size_to_send = 0;
+volatile uint8_t is_sending               = false;
+volatile uint16_t size_to_send            = 0;
+volatile uint16_t P2L_PrevPointerPosition = 0;
 /*******************************************************************************
  * Function
  ******************************************************************************/
@@ -77,7 +78,7 @@ void PipeCom_Init(void)
     HAL_NVIC_EnableIRQ(PIPE_COM_IRQ);
     HAL_NVIC_SetPriority(PIPE_COM_IRQ, 1, 1);
 
-    PipeBuffer_Init();
+    P2L_PrevPointerPosition = 0;
     PipeCom_DMAInit();
 }
 /******************************************************************************
@@ -134,6 +135,7 @@ static void PipeCom_DMAInit(void)
 void PipeCom_SendL2P(uint8_t *data, uint16_t size)
 {
     LUOS_ASSERT(size > 0);
+
     is_sending   = true;
     size_to_send = size;
     LL_DMA_DisableChannel(L2P_DMA, L2P_DMA_CHANNEL);
@@ -157,28 +159,34 @@ volatile uint8_t PipeCom_SendL2PPending(void)
  ******************************************************************************/
 void PIPE_COM_IRQHANDLER()
 {
-    uint16_t LastData        = 0;
-    uint8_t P2L_FlagOverFlow = false;
+    uint16_t size                = 0;
+    uint16_t P2L_PointerPosition = 0;
+
     // check if we receive an IDLE on usart3
     if (LL_USART_IsActiveFlag_IDLE(PIPE_COM))
     {
         LL_USART_ClearFlag_IDLE(PIPE_COM);
-        if (P2L_DMA_TC(P2L_DMA) != RESET)
+        if (LL_DMA_GetDataLength(P2L_DMA, P2L_DMA_CHANNEL) == 0)
+        {
+            return;
+        }
+
+        P2L_PointerPosition = PIPE_TO_LUOS_BUFFER_SIZE - LL_DMA_GetDataLength(P2L_DMA, P2L_DMA_CHANNEL);
+
+        if (P2L_DMA_TC(P2L_DMA) != RESET) // DMA buffer overflow
         {
             P2L_DMA_CLEAR_TC(P2L_DMA);
-            P2L_FlagOverFlow = true;
-        }
-        LastData = PIPE_TO_LUOS_BUFFER_SIZE - LL_DMA_GetDataLength(P2L_DMA, P2L_DMA_CHANNEL);
-        if (LastData == 0)
-        {
-            LastData         = PIPE_TO_LUOS_BUFFER_SIZE - 1;
-            P2L_FlagOverFlow = false;
+            size = (PIPE_TO_LUOS_BUFFER_SIZE - P2L_PrevPointerPosition) + P2L_PointerPosition;
         }
         else
         {
-            LastData = LastData - 1;
+            size = P2L_PointerPosition - P2L_PrevPointerPosition;
         }
-        PipeBuffer_AllocP2LTask(LastData, P2L_FlagOverFlow);
+        P2L_PrevPointerPosition = P2L_PointerPosition;
+        if (size != 0)
+        {
+            Stream_AddAvailableSampleNB(get_P2L_StreamChannel(), size);
+        }
     }
 }
 /******************************************************************************
