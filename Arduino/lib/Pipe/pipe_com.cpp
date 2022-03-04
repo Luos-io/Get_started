@@ -26,10 +26,7 @@ extern "C"
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-volatile uint8_t is_sending       = false;
-volatile uint16_t size_to_send    = 0;
-volatile uint16_t size_to_receive = 0;
-volatile uint8_t saved_data       = 0;
+volatile uint8_t is_sending = false;
 /*******************************************************************************
  * Function
  ******************************************************************************/
@@ -42,9 +39,7 @@ volatile uint8_t saved_data       = 0;
 void PipeCom_Init(void)
 {
     Serial.begin(1000000);
-    PipeBuffer_Init();
 }
-
 /******************************************************************************
  * @brief init must be call in project init
  * @param None
@@ -66,14 +61,6 @@ void PipeCom_ReceiveP2L(void)
     {
         data = Serial.read();
         Stream_PutSample(get_P2L_StreamChannel(), &data, 1);
-        size_to_receive++;
-        if ((data == '\n') && (saved_data == '\r'))
-        {
-            PipeBuffer_AllocP2LTask(size_to_receive);
-            size_to_receive = 0;
-        }
-        // update saved_data
-        saved_data = data;
     }
 }
 /******************************************************************************
@@ -83,15 +70,7 @@ void PipeCom_ReceiveP2L(void)
  ******************************************************************************/
 void PipeCom_SendL2P(uint8_t *data, uint16_t size)
 {
-    is_sending     = true;
-    size_to_send   = size;
-    char character = 0;
-    while (size_to_send != 0)
-    {
-        character = *data;
-        Serial.write(&character, 1);
-        data++;
-        size_to_send--;
-    }
+    is_sending = true;
+    Serial.write(data, size);
     is_sending = false;
 }

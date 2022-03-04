@@ -17,6 +17,8 @@
  ******************************************************************************/
 streaming_channel_t P2L_StreamChannel;
 streaming_channel_t L2P_StreamChannel;
+
+uint8_t L2P_CompleteMsg = true;
 /*******************************************************************************
  * Function
  ******************************************************************************/
@@ -65,26 +67,36 @@ void Pipe_Loop(void)
  ******************************************************************************/
 static void Pipe_MsgHandler(service_t *service, msg_t *msg)
 {
-    uint8_t *data = 0;
-    uint16_t size = 0;
+    SerialProtocol_t SerialProtocol = {SERIAL_HEADER, 0, SERIAL_FOOTER};
+    uint16_t size                   = 0;
+
     if (msg->header.cmd == GET_CMD)
     {
-        if (true == PipeBuffer_GetP2LTask(&data, &size))
+        if (true == PipeBuffer_GetP2LMsg(&size))
         {
             // fill the message infos
             msg_t pub_msg;
             pub_msg.header.cmd         = SET_CMD;
             pub_msg.header.target_mode = ID;
             pub_msg.header.target      = msg->header.source;
-            pub_msg.header.size        = size;
-            Luos_SendStreaming(service, &pub_msg, &P2L_StreamChannel);
+            Luos_SendStreamingSize(service, &pub_msg, &P2L_StreamChannel, size);
         }
     }
     else if (msg->header.cmd == SET_CMD)
     {
         if (msg->header.size > 0)
         {
-            Luos_ReceiveStreaming(service, msg, &L2P_StreamChannel);
+            if (L2P_CompleteMsg == true)
+            {
+                L2P_CompleteMsg     = false;
+                SerialProtocol.Size = msg->header.size;
+                Stream_PutSample(&L2P_StreamChannel, &SerialProtocol, 3);
+            }
+            if (Luos_ReceiveStreaming(service, msg, &L2P_StreamChannel) == SUCCEED)
+            {
+                Stream_PutSample(&L2P_StreamChannel, &SerialProtocol.Footer, 1);
+                L2P_CompleteMsg = true;
+            }
         }
     }
     else if (msg->header.cmd == PARAMETERS)
@@ -95,7 +107,7 @@ static void Pipe_MsgHandler(service_t *service, msg_t *msg)
         pub_msg.header.target_mode = IDACK;
         pub_msg.header.target      = msg->header.source;
         pub_msg.header.size        = sizeof(void *);
-        int value                  = (int)&L2P_StreamChannel;
+        int value                  = (int)&PipeBuffer_SetL2PMsg;
         memcpy(pub_msg.data, &value, sizeof(void *));
         Luos_SendMsg(service, &pub_msg);
     }

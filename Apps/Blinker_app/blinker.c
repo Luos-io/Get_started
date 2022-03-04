@@ -37,7 +37,6 @@ void Blinker_Init(void)
 void Blinker_Loop(void)
 {
     static uint8_t led_last_state = 0; // Is the LED on or off?
-    uint16_t id_led;
 
     // Check to see if we have overshot our counter
     if ((my_time < Luos_GetSystick()) && (control_app.flux == PLAY))
@@ -53,13 +52,14 @@ void Blinker_Loop(void)
         msg_t led_msg;
 
         // Get the ID of our LED from the routing table
-        id_led = RoutingTB_IDFromAlias("led");
+        search_result_t led_result;
+        RTFilter_Alias(RTFilter_Reset(&led_result), "led");
 
-        if (id_led > 0)
+        if (led_result.result_nbr > 0)
         {
-            led_msg.header.target      = id_led;   // We are sending this to the LED
-            led_msg.header.cmd         = IO_STATE; // We are specifying an IO state (on or off)
-            led_msg.header.target_mode = IDACK;    // We are asking for an acknowledgement
+            led_msg.header.target      = led_result.result_table[0]->id; // We are sending this to the LED
+            led_msg.header.cmd         = IO_STATE;                       // We are specifying an IO state (on or off)
+            led_msg.header.target_mode = IDACK;                          // We are asking for an acknowledgement
 
             led_msg.header.size = sizeof(char);   // Our message only contains one character, the IO state
             led_msg.data[0]     = led_last_state; // The I/O state of the LED to be sent
