@@ -14,6 +14,6 @@
         ]
     },
     "dependencies": {
-        "luos/luos_engine": "^2.4.1"
+        "luos/luos_engine": ">2.4.1"
     }
 }
