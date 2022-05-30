@@ -1,3 +1,6 @@
 **/.pio
 **/.vscode
 **/.DS_Store
+**/.git
+**/.gitignore
+info.log
