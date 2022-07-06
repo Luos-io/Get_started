@@ -111,4 +111,25 @@
  ******************************************************************************/
 #define FLASH_SECTOR FLASH_SECTOR_4
 
+/*******************************************************************************
+ * FLASH CONFIGURATION FOR APP WITH BOOTLOADER
+ ********************************************************************************
+ *    Define                | Default Value              | Description
+ *    :---------------------|------------------------------------------------------
+ *    BOOT_START_ADDRESS    | FLASH_BASE = 0x8000000     | Start address of Bootloader in flash
+ *    SHARED_MEMORY_ADDRESS | 0x0800C000                 | Start address of shared memory to save boot flag
+ *    APP_START_ADDRESS     | 0x0800C800                 | Start address of application with bootloader
+ *    APP_END_ADDRESS       | FLASH_END                  | End address of application with bootloader
+ ******************************************************************************/
+
+/*******************************************************************************
+ * OTHER GATE PARAMETERS
+ *******************************************************************************
+ *    Define                    | Default Value              | Description
+ *    :-------------------------|------------------------------------------------------
+ *    INIT_TIME                 |              150           | Wait init time before first detection
+ * ******************************************************************************/
+
+#define INIT_TIME 150
+
 #endif /* _NODE_CONFIG_H_ */
