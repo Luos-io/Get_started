@@ -59,7 +59,7 @@ void Blinker_Loop(void)
         {
             led_msg.header.target      = led_result.result_table[0]->id; // We are sending this to the LED
             led_msg.header.cmd         = IO_STATE;                       // We are specifying an IO state (on or off)
-            led_msg.header.target_mode = IDACK;                          // We are asking for an acknowledgement
+            led_msg.header.target_mode = SERVICEIDACK;                   // We are asking for an acknowledgement
 
             led_msg.header.size = sizeof(char);   // Our message only contains one character, the IO state
             led_msg.data[0]     = led_last_state; // The I/O state of the LED to be sent
