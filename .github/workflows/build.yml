@@ -69,18 +69,20 @@ jobs:
 
       - name: Run PlatformIO
         run: |
+          rootPath=$(pwd)
           for d in ${{ matrix.project_folders }}/*/
           do
             # Parse all folder
             if [ -f "$d/platformio.ini" ]
             then
+              cd $d
               # This is a PIO project compile it for all envs
-              for e in $(pio project config |grep "env:"|cut -c5-)
+              for e in $(pio project config | grep "env:" | cut -c5-)
               do
-              echo "Platform : $e"
-              echo "Compiling : $d"
-              pio run d $d -e $e &
+                echo "Compiling $d in env $e"
+                platformio run -d "$rootPath/$d" -e $e
               done
+              cd $rootPath
             else
               # This folder could contain other projects, continue digging
               for dd in $d*/
@@ -88,9 +90,14 @@ jobs:
                 # Parse all folder
                 if [ -f "$dd/platformio.ini" ]
                 then
+                  cd $dd
                   # This is a PIO project compile it
-                  echo "Compiling : $d"
-                  platformio run -d $dd
+                  for e in $(pio project config | grep "env:" | cut -c5-)
+                  do
+                    echo "Compiling $dd in env $e"
+                    platformio run -d "$rootPath/$dd" -e $e
+                  done
+                  cd $rootPath
                 fi
               done
             fi
