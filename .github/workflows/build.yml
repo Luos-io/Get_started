@@ -43,6 +43,7 @@ jobs:
         project_folders:
           [
             Arduino,
+            ESP32-DevKit,
             NUCLEO-F072RB,
             NUCLEO-F401RE,
             NUCLEO-F410RB,
