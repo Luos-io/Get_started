@@ -61,3 +61,4 @@ jobs:
           platformio run -d NUCLEO-F410RB
           platformio run -d NUCLEO-G431KB
           platformio run -d NUCLEO-L432KC
+          platformio run -d ESP32-DevKit
