@@ -2,28 +2,27 @@ name: Build
 
 on:
   push:
-    branches:
-      - master
+
+concurrency:
+  group: dev-build-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-        include:
-          - os: windows-latest
-            pio_lib_path: D:\a\Luos
-          - os: macos-latest
-            pio_lib_path: ~/work/Luos
-          - os: ubuntu-latest
-            pio_lib_path: ~/work/Luos
-
+  code-format:
+    name: Code format
+    runs-on: ubuntu-latest
     steps:
+      - name: Check out Luos repository
+        uses: actions/checkout@v3
+
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.x"
+          python-version: "3.10.5"
 
       - name: Set up Node
         uses: actions/setup-node@v2
@@ -31,20 +30,38 @@ jobs:
           node-version: "14"
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install platformio
-          npm install -g clang-format@1.5.0
-
-      - name: Check out getting started repository
-        uses: actions/checkout@v2
+        run: npm install -g clang-format@1.5.0
 
       - name: Check for code format
-        if: ${{ runner.os != 'Windows' }}
         run: python .github/workflows/run-clang-format.py -r .
 
-      - name: Create env repo
-        shell: bash
+  get-started-build:
+    name: Get started build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        project_folders:
+          [
+            Arduino,
+            ESP32-DevKit,
+            NUCLEO-F072RB,
+            NUCLEO-F401RE,
+            NUCLEO-F410RB,
+            NUCLEO-G431KB,
+            NUCLEO-L432KC,
+          ]
+        os: [macos-latest, windows-latest, ubuntu-latest]
+
+    steps:
+      - name: Check out Luos repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.5"
+
+      - name: Install dependencies
         run: |
           # Save branch name
           branch_name=$(git branch --show-current)
@@ -52,12 +69,44 @@ jobs:
           echo current branch name is ${branch_name}
 
       - name: Run PlatformIO
-        env:
-          PLATFORMIO_LIB_EXTRA_DIRS: ${{ matrix.pio_lib_path }}
         run: |
-          platformio run -d Arduino
-          platformio run -d NUCLEO-F072RB
-          platformio run -d NUCLEO-F401RE
-          platformio run -d NUCLEO-F410RB
-          platformio run -d NUCLEO-G431KB
-          platformio run -d NUCLEO-L432KC
+          rootPath=$(pwd)
+          for d in ${{ matrix.project_folders }}/*/
+          do
+            # Parse all folder
+            if [ -f "$d/platformio.ini" ]
+            then
+              cd $d
+              # This is a PIO project compile it for all envs
+              for e in $(pio project config | grep "env:" | cut -c5-)
+              do
+                echo "Compiling $d in env $e"
+                platformio run -d "$rootPath/$d" -e $e
+              done
+              cd $rootPath
+            else
+              # This folder could contain other projects, continue digging
+              for dd in $d*/
+              do
+                # Parse all folder
+                if [ -f "$dd/platformio.ini" ]
+                then
+                  cd $dd
+                  # This is a PIO project compile it
+                  for e in $(pio project config | grep "env:" | cut -c5-)
+                  do
+                    echo "Compiling $dd in env $e"
+                    platformio run -d "$rootPath/$dd" -e $e
+                  done
+                  cd $rootPath
+                fi
+              done
+            fi
+          done
+
+  build-success:
+    name: Build success
+    needs: get-started-build
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Build succeed!"
