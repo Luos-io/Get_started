@@ -11,7 +11,7 @@
 #else
 #include <termios.h>
 #endif
-//#include <fcntl.h>
+// #include <fcntl.h>
 #include "led.h"
 #include <stdlib.h>
 
@@ -87,7 +87,6 @@ static void Led_MsgHandler(service_t *service, msg_t *msg)
         pub_msg.header.target_mode = SERVICEID;
         pub_msg.header.target      = msg->header.source;
         pub_msg.header.size        = sizeof(char);
-        pub_msg.data[0]            = Led_last_state;
         Luos_SendMsg(service, &pub_msg);
         return;
     }
