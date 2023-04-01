@@ -5,30 +5,29 @@ on:
     branches-ignore:
       - master
 
+defaults:
+  run:
+    shell: bash
+      
 jobs:
-  build:
+  dev-build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
         include:
           - os: windows-latest
-            pio_lib_path: D:\a\Luos
+            pio_lib_path: D:\a\Get_started, D:\a\Get_started\luos_engine\tool_services
           - os: macos-latest
-            pio_lib_path: ~/work/Luos
+            pio_lib_path: /home/runner/work/Get_started, /home/runner/work/Get_started/luos_engine/tool_services
           - os: ubuntu-latest
-            pio_lib_path: ~/work/Luos
+            pio_lib_path: /home/runner/work/Get_started, /home/runner/work/Get_started/luos_engine/tool_services
 
     steps:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
           python-version: "3.x"
-
-      - name: Set up Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: "14"
 
       - name: Install dependencies
         run: |
@@ -50,15 +49,27 @@ jobs:
           branch_name=$(git branch --show-current)
           origine_branch_name="origin/${branch_name}"
           echo current branch name is ${branch_name}
+          if [ `git ls-remote --heads https://github.com/Luos-io/luos_engine.git ${branch_name}  | wc -l` ]
+          then
+            echo "Branch name ${branch_name} exists on luos_engine."
+            cd ..
+            git clone https://github.com/Luos-io/luos_engine.git
+            cd luos_engine
+            the_path=$(pwd)
+            echo "the pio lib path is ${{ matrix.pio_lib_path }}"
+            echo "luos_engine path is ${the_path}"
+            git checkout ${branch_name}
+            cd ../Get_started
+            echo "Get_started path is $(pwd)"
+          fi
 
       - name: Run PlatformIO
         env:
           PLATFORMIO_LIB_EXTRA_DIRS: ${{ matrix.pio_lib_path }}
         run: |
-          platformio run -d Arduino
-          platformio run -d NUCLEO-F072RB
-          platformio run -d NUCLEO-F401RE
-          platformio run -d NUCLEO-F410RB
-          platformio run -d NUCLEO-G431KB
-          platformio run -d NUCLEO-L432KC
-          platformio run -d ESP32-DevKit
+          for dir in */; do
+             if [ -f "$dir/platformio.ini" ]; then
+                 echo "Compiling: $dir"
+                 platformio run -d "$dir"
+             fi
+          done
