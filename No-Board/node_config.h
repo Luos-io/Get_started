@@ -95,13 +95,12 @@
  *******************************************************************************
  *    Define                    | Default Value              | Description
  *    :-------------------------|------------------------------------------------------
- *    MAX_RTB_ENTRY             |              40            | max number entry in routing table
+ *    MAX_NODE_NUMBER             |              20            | max number of node in the network
  *    GATE_BUFF_SIZE            |             1024           | Json receive buffer size
  *    PIPE_TO_LUOS_BUFFER_SIZE  |             1024           | Receive pipe buffer size
  *    LUOS_TO_PIPE_BUFFER_SIZE  |             2048           | Transmit pipe buffer size
  *    INIT_TIME                 |              150           | Wait init time before first detection
  ******************************************************************************/
-#define MAX_RTB_ENTRY       40
 #define GATE_BUFF_SIZE      1024
 #define PIPE_RX_BUFFER_SIZE 1024
 #define PIPE_TX_BUFFER_SIZE 2048

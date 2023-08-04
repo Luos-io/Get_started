@@ -1,11 +1,11 @@
 /******************************************************************************
- * @file led
- * @brief driver example a simple led
+ * @file button
+ * @brief driver example a simple button
  * @author Luos
  * @version 0.0.0
  ******************************************************************************/
-#ifndef LED_H
-#define LED_H
+#ifndef BUTTON_H
+#define BUTTON_H
 
 #include "luos_engine.h"
 /*******************************************************************************
@@ -22,4 +22,4 @@
 void Led_Init(void);
 void Led_Loop(void);
 
-#endif /* LED_H */
+#endif /* BUTTON_H */

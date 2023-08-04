@@ -1,19 +1,10 @@
 #include <Arduino.h>
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include "luos_engine.h"
 #include "led.h"
 #include "blinker.h"
 #include "pipe.h"
 #include "gate.h"
-
-#ifdef __cplusplus
-}
-#endif
+#include "robus_network.h"
 
 /******************************************************************************
  * @brief Setup ardiuno
@@ -23,6 +14,7 @@ extern "C"
 void setup()
 {
     Luos_Init();
+    Robus_Init();
     Led_Init();
     Pipe_Init();
     Gate_Init();
@@ -36,6 +28,7 @@ void setup()
 void loop()
 {
     Luos_Loop();
+    Robus_Loop();
     Led_Loop();
     Pipe_Loop();
     Gate_Loop();
