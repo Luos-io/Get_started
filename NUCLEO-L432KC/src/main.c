@@ -28,7 +28,7 @@
 #include "led.h"
 #include "luos_engine.h"
 #include "pipe.h"
-
+#include "robus_network.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -93,6 +93,7 @@ int main(void)
     MX_GPIO_Init();
     /* USER CODE BEGIN 2 */
     Luos_Init();
+    Robus_Init();
     Led_Init();
     Pipe_Init();
     Gate_Init();
@@ -107,6 +108,7 @@ int main(void)
 
         /* USER CODE BEGIN 3 */
         Luos_Loop();
+        Robus_Loop();
         Led_Loop();
         Pipe_Loop();
         Gate_Loop();

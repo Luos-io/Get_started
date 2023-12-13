@@ -14,7 +14,7 @@ volatile time_luos_t blinktime;
 unsigned long my_time; // Used to keep track of time
 volatile control_t control_app;
 
-static void Blinker_MsgHandler(service_t *service, msg_t *msg);
+static void Blinker_MsgHandler(service_t *service, const msg_t *msg);
 
 void Blinker_Init(void)
 {
@@ -70,7 +70,7 @@ void Blinker_Loop(void)
     }
 }
 
-static void Blinker_MsgHandler(service_t *service, msg_t *msg)
+static void Blinker_MsgHandler(service_t *service, const msg_t *msg)
 {
     if (msg->header.cmd == CONTROL)
     {

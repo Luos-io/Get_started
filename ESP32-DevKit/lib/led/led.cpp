@@ -1,15 +1,16 @@
 /******************************************************************************
- * @file Led
- * @brief driver example a simple Led
+ * @file led
+ * @brief driver example a simple led
  * @author Luos
  * @version 0.0.0
  ******************************************************************************/
+#include <Arduino.h>
 #include "led.h"
-#include "Arduino.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-
+#define LED_PIN 18
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -17,8 +18,7 @@
 /*******************************************************************************
  * Function
  ******************************************************************************/
-static void Led_MsgHandler(service_t *service, msg_t *msg);
-
+static void Led_MsgHandler(service_t *service, const msg_t *msg);
 /******************************************************************************
  * @brief init must be call in project init
  * @param None
@@ -26,9 +26,11 @@ static void Led_MsgHandler(service_t *service, msg_t *msg);
  ******************************************************************************/
 void Led_Init(void)
 {
-    pinMode(LED_BUILTIN, OUTPUT);
-
-    revision_t revision = {.major = 1, .minor = 0, .build = 0};
+    revision_t revision;
+    revision.major = 1;
+    revision.minor = 0;
+    revision.build = 0;
+    pinMode(LED_PIN, OUTPUT);
     Luos_CreateService(Led_MsgHandler, STATE_TYPE, "led", revision);
 }
 /******************************************************************************
@@ -36,24 +38,26 @@ void Led_Init(void)
  * @param None
  * @return None
  ******************************************************************************/
-void Led_Loop(void) {}
+void Led_Loop(void)
+{
+}
 /******************************************************************************
- * @brief Msg manager callback when a msg receive for this service
- * @param service destination
+ * @brief Msg Handler call back when a msg receive for this service
+ * @param Service destination
  * @param Msg receive
  * @return None
  ******************************************************************************/
-static void Led_MsgHandler(service_t *service, msg_t *msg)
+static void Led_MsgHandler(service_t *service, const msg_t *msg)
 {
     if (msg->header.cmd == IO_STATE)
     {
         if (msg->data[0] == 0)
         {
-            digitalWrite(LED_BUILTIN, false);
+            digitalWrite(LED_PIN, false);
         }
         else
         {
-            digitalWrite(LED_BUILTIN, true);
+            digitalWrite(LED_PIN, true);
         }
     }
 }

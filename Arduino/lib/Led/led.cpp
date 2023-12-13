@@ -5,8 +5,7 @@
  * @version 0.0.0
  ******************************************************************************/
 #include "led.h"
-#include "gpio.h"
-
+#include "Arduino.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -14,7 +13,7 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-uint8_t Led_last_state = 0;
+
 /*******************************************************************************
  * Function
  ******************************************************************************/
@@ -27,7 +26,12 @@ static void Led_MsgHandler(service_t *service, const msg_t *msg);
  ******************************************************************************/
 void Led_Init(void)
 {
-    revision_t revision = {.major = 1, .minor = 0, .build = 0};
+    pinMode(LED_BUILTIN, OUTPUT);
+
+    revision_t revision;
+    revision.major = 1;
+    revision.minor = 0;
+    revision.build = 0;
     Luos_CreateService(Led_MsgHandler, STATE_TYPE, "led", revision);
 }
 /******************************************************************************
@@ -44,24 +48,15 @@ void Led_Loop(void) {}
  ******************************************************************************/
 static void Led_MsgHandler(service_t *service, const msg_t *msg)
 {
-    if (msg->header.cmd == GET_CMD)
+    if (msg->header.cmd == IO_STATE)
     {
-        // fill the message infos
-        msg_t pub_msg;
-        pub_msg.header.cmd         = IO_STATE;
-        pub_msg.header.target_mode = SERVICEID;
-        pub_msg.header.target      = msg->header.source;
-        pub_msg.header.size        = sizeof(char);
-        pub_msg.data[0]            = HAL_GPIO_ReadPin(LED_GPIO_Port, LED_Pin);
-        Luos_SendMsg(service, &pub_msg);
-        return;
-    }
-    else if (msg->header.cmd == IO_STATE)
-    {
-        if (msg->data[0] != Led_last_state)
+        if (msg->data[0] == 0)
         {
-            Led_last_state = msg->data[0];
-            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, Led_last_state);
+            digitalWrite(LED_BUILTIN, false);
+        }
+        else
+        {
+            digitalWrite(LED_BUILTIN, true);
         }
     }
 }

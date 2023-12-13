@@ -6,6 +6,7 @@
 #include "gate.h"
 #include "led.h"
 #include "luos_engine.h"
+#include "robus_network.h"
 #include "pipe.h"
 
 /*****************************************
@@ -15,6 +16,7 @@
 int main(void)
 {
     Luos_Init();
+    Robus_Init();
     Led_Init();
     Pipe_Init();
     Gate_Init();
@@ -23,6 +25,7 @@ int main(void)
     while (1)
     {
         Luos_Loop();
+        Robus_Loop();
         Led_Loop();
         Pipe_Loop();
         Gate_Loop();
