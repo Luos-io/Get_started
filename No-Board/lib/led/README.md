@@ -11,7 +11,7 @@ https://github.com/Luos-io/Examples/blob/master/LICENSE)
 Driver for using an RGB LED in your projects with Luos.
 
 # Link project
-This driver is linked to the [LED project](../../Projects/Led).
+This driver is linked to the [LED project](../../Projects/led).
 
 [![](https://img.shields.io/discourse/topics?server=https%3A%2F%2Fcommunity.luos.io&logo=Discourse)](https://community.luos.io)
 [![](https://img.shields.io/badge/Luos-Documentation-34A3B4)](https://docs.luos.io)

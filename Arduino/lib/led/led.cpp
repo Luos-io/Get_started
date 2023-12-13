@@ -1,6 +1,6 @@
 /******************************************************************************
- * @file Led
- * @brief driver example a simple Led
+ * @file led
+ * @brief driver example a simple led
  * @author Luos
  * @version 0.0.0
  ******************************************************************************/
