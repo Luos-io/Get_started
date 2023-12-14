@@ -1,5 +1,5 @@
 {
-    "name": "Blinker_App",
+    "name": "blinker_app",
     "keywords": "robus,network,microservice,luos,operating system,os,embedded,communication,service,ST, Arduino",
     "description": "A simple Luos blinker App.",
     "version": "1.0.0",
